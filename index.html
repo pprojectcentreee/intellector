@@ -3,395 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instruction-Discipline Framework | AI Reasoning</title>
-    <!-- Inter Font for Professional Look -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --sidebar-bg: #ffffff;
-            --main-bg: #f8fafc;
-            --accent: #0f172a; /* Slate 900 */
-            --border: #e2e8f0;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --protection-line-color: #059669; /* Emerald 600 */
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--main-bg);
-            color: var(--text-main);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Sidebar Styling */
-        aside {
-            width: 300px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 24px;
-        }
-
-        .brand h1 {
-            font-size: 14px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .brand p {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 30px;
-        }
-
-        .step-list {
-            list-style: none;
-            flex-grow: 1;
-        }
-
-        .step-item {
-            padding: 12px;
-            font-size: 13px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            transition: 0.3s;
-            border: 1px solid transparent;
-        }
-
-        .step-item.active {
-            background: var(--accent);
-            color: white;
-            font-weight: 600;
-        }
-
-        .step-item.completed {
-            color: var(--protection-line-color);
-            border-color: var(--protection-line-color);
-        }
-
-        .protection-box {
-            background: #ecfdf5;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #d1fae5;
-            margin-top: auto;
-        }
-
-        .protection-box h4 {
-            font-size: 10px;
-            color: var(--protection-line-color);
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .protection-box p {
-            font-size: 11px;
-            font-style: italic;
-            color: #065f46;
-        }
-
-        /* Main Content Styling */
-        main {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        header {
-            height: 60px;
-            background: white;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            padding: 0 40px;
-            justify-content: space-between;
-        }
-
-        #workspace {
-            flex-grow: 1;
-            padding: 40px;
-            overflow-y: auto;
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .response-block {
-            margin-bottom: 40px;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .response-block h2 {
-            font-size: 12px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-            margin-bottom: 15px;
-        }
-
-        .content {
-            font-size: 15px;
-            line-height: 1.7;
-            white-space: pre-wrap;
-        }
-
-        /* Input Area */
-        .input-container {
-            padding: 30px 40px;
-            background: white;
-            border-top: 1px solid var(--border);
-        }
-
-        .input-wrapper {
-            max-width: 820px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 15px 20px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 15px;
-            resize: none;
-            height: 80px;
-            outline: none;
-            transition: border 0.3s;
-        }
-
-        textarea:focus {
-            border-color: var(--accent);
-        }
-
-        button#send-btn {
-            position: absolute;
-            right: 15px;
-            bottom: 15px;
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        button#send-btn:disabled {
-            background: var(--border);
-            cursor: not-allowed;
-        }
-
-        /* Loading Animation */
-        .loader {
-            font-size: 13px;
-            color: var(--text-muted);
-            display: none;
-            margin-bottom: 20px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* API Key Modal */
-        #api-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            width: 400px;
-            text-align: center;
-        }
-
-        .modal-content input {
-            width: 100%;
-            padding: 10px;
-            margin: 20px 0;
-            border: 1px solid var(--border);
-        }
-    </style>
+    <title>Discipline AI — Responsible Reasoning Framework</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <!-- API Setup Modal -->
-    <div id="api-modal">
-        <div class="modal-content">
-            <h3>Framework Setup</h3>
-            <p style="font-size: 13px; color: var(--text-muted);">Enter your Gemini API Key to begin.</p>
-            <input type="password" id="api-key-input" placeholder="Paste API Key here...">
-            <button id="save-key" style="width:100%; padding:10px; background:black; color:white; border:none; cursor:pointer;">Start Workspace</button>
+    <!-- Startup Overlay — API Key Entry -->
+    <div class="api-overlay" id="apiOverlay">
+        <div class="api-modal">
+            <div class="api-modal-brand">
+                <div class="brand-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect x="2" y="2" width="28" height="28" rx="6" stroke="#c8a elegance" stroke-width="2.5" fill="none" stroke="currentColor"/>
+                        <path d="M10 16h12M16 10v12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h1>Discipline AI</h1>
+                <p class="api-subtitle">Responsible AI-Assisted Reasoning</p>
+            </div>
+            <div class="api-form">
+                <label for="apiKeyInput">Gemini API Key</label>
+                <div class="api-input-wrap">
+                    <input 
+                        type="password" 
+                        id="apiKeyInput" 
+                        placeholder="Enter your Google Gemini API key"
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <button class="api-toggle-vis" id="toggleKeyVis" title="Show key">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
+                <p class="api-hint">Your key stays in your browser. Never sent to any server except Google's API.</p>
+                <button class="api-submit" id="apiSubmit">Enter Framework</button>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="api-get-key">Get a free API key from Google AI Studio →</a>
+            </div>
         </div>
     </div>
 
-    <aside>
-        <div class="brand">
-            <h1>Reasoning Framework</h1>
-            <p>Instruction-Discipline Methodology</p>
-        </div>
-
-        <ul class="step-list">
-            <li class="step-item active" id="step-0">3.1 Idea Identification</li>
-            <li class="step-item" id="step-1">3.2 Question Expansion</li>
-            <li class="step-item" id="step-2">3.3 Scope Control</li>
-            <li class="step-item" id="step-3">3.4 Authority Building</li>
-            <li class="step-item" id="step-4">3.5 Output Selection</li>
-        </ul>
-
-        <div class="protection-box">
-            <h4>Non-Negotiable Guardrail</h4>
-            <p>"...without diluting the core argument."</p>
-        </div>
-    </aside>
-
-    <main>
-        <header>
-            <div id="current-step-label" style="font-size: 13px; font-weight: 600;">Ready to begin...</div>
-            <div style="font-size: 12px; color: var(--protection-line-color); font-weight: bold;">[PROTECTION ACTIVE]</div>
-        </header>
-
-        <div id="workspace">
-            <!-- AI Responses will appear here -->
-        </div>
-
-        <div class="input-container">
-            <div id="loader" class="loader">Refining content through Instruction Discipline...</div>
-            <div class="input-wrapper">
-                <textarea id="user-input" placeholder="Enter your raw idea or observation here..."></textarea>
-                <button id="send-btn">Process Step</button>
+    <!-- Main Application -->
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-mark">
+                        <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+                            <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M10 16h12M16 10v12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <span class="brand-name">Discipline AI</span>
+                </div>
+                <button class="new-chat-btn" id="newChatBtn" title="New session">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                    </svg>
+                </button>
             </div>
-        </div>
-    </main>
 
-    <script>
-        let API_KEY = "";
-        let currentStepIndex = 0;
-        let contextHistory = "";
+            <div class="sidebar-section">
+                <div class="section-label">Framework Phases</div>
+                <nav class="phase-nav">
+                    <button class="phase-btn active" data-phase="open">
+                        <span class="phase-indicator"></span>
+                        Open Dialogue
+                    </button>
+                    <button class="phase-btn" data-phase="identify">
+                        <span class="phase-indicator"></span>
+                        3.1 — Idea Identification
+                    </button>
+                    <button class="phase-btn" data-phase="expand">
+                        <span class="phase-indicator"></span>
+                        3.2 — Question Expansion
+                    </button>
+                    <button class="phase-btn" data-phase="scope">
+                        <span class="phase-indicator"></span>
+                        3.3 — Scope Control
+                    </button>
+                    <button class="phase-btn" data-phase="authority">
+                        <span class="phase-indicator"></span>
+                        3.4 — Authority Building
+                    </button>
+                    <button class="phase-btn" data-phase="output">
+                        <span class="phase-indicator"></span>
+                        3.5 — Output Selection
+                    </button>
+                    <div class="phase-divider"></div>
+                    <button class="phase-btn" data-phase="refine">
+                        <span class="phase-indicator"></span>
+                        4.0 — Instruction Discipline
+                    </button>
+                </nav>
+            </div>
 
-        const steps = [
-            { id: "step-0", label: "3.1 Idea Identification", prompt: "I have a raw idea or issue: " },
-            { id: "step-1", label: "3.2 Question Expansion", prompt: "Based on the idea provided, list all meaningful questions that arise without diluting the core argument." },
-            { id: "step-2", label: "3.3 Scope Control", prompt: "Categorise this issue by domain (science, law, economy, etc.) and indicate feasible depth without diluting the core argument." },
-            { id: "step-3", label: "3.4 Authority Building", prompt: "Analyse this issue using established research or precedents. Avoid speculation. Do not dilute the core argument." },
-            { id: "step-4", label: "3.5 Final Output", prompt: "Convert this entire analysis into a professional policy note or academic summary without diluting the core idea." }
-        ];
+            <div class="sidebar-section">
+                <div class="section-label">History</div>
+                <div class="history-list" id="historyList">
+                    <div class="history-empty">No previous sessions</div>
+                </div>
+            </div>
 
-        // API Setup
-        document.getElementById('save-key').addEventListener('click', () => {
-            const val = document.getElementById('api-key-input').value;
-            if(val) {
-                API_KEY = val;
-                document.getElementById('api-modal').style.display = 'none';
-            }
-        });
+            <div class="sidebar-footer">
+                <button class="sidebar-footer-btn" id="clearAllBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                        <path d="M10 11v6M14 11v6"/>
+                    </svg>
+                    Clear all sessions
+                </button>
+                <button class="sidebar-footer-btn" id="changeKeyBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.78 7.78 5.5 5.5 0 017.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                    </svg>
+                    Change API key
+                </button>
+            </div>
+        </aside>
 
-        const sendBtn = document.getElementById('send-btn');
-        const userInput = document.getElementById('user-input');
-        const workspace = document.getElementById('workspace');
-        const loader = document.getElementById('loader');
+        <!-- Mobile sidebar toggle -->
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+        </button>
 
-        async function callGemini(fullPrompt) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: fullPrompt }] }]
-                })
-            });
+        <!-- Main Chat Area -->
+        <main class="main-area">
+            <!-- Chat header -->
+            <div class="chat-header" id="chatHeader">
+                <div class="chat-header-phase" id="headerPhaseLabel">Open Dialogue</div>
+                <div class="protection-line">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Protection: "…without diluting the core argument."
+                </div>
+            </div>
 
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
-        }
+            <!-- Messages container -->
+            <div class="messages-container" id="messagesContainer">
+                <!-- Welcome screen -->
+                <div class="welcome-screen" id="welcomeScreen">
+                    <div class="welcome-icon">
+                        <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+                            <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M10 16h12M16 10v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h2>Discipline AI Framework</h2>
+                    <p>Responsible AI-Assisted Reasoning</p>
+                    <div class="welcome-cards">
+                        <div class="welcome-card" data-prompt="I have a raw idea about the impact of social media algorithms on democratic discourse. Help me identify the core issue.">
+                            <div class="card-phase">3.1 — Identify</div>
+                            <div class="card-text">Identify the core issue from a raw observation</div>
+                        </div>
+                        <div class="welcome-card" data-prompt="From this issue of rising antibiotic resistance, list all meaningful questions that arise across scientific, policy, and public health domains.">
+                            <div class="card-phase">3.2 — Expand</div>
+                            <div class="card-text">Map analytical questions from an issue</div>
+                        </div>
+                        <div class="welcome-card" data-prompt="Categorise the issue of urban water scarcity by domain — science, law, economy, public health, governance. Indicate feasible depth of analysis in each.">
+                            <div class="card-phase">3.3 — Scope</div>
+                            <div class="card-text">Control scope with domain mapping</div>
+                        </div>
+                        <div class="welcome-card" data-prompt="Analyse the issue of microplastic contamination in drinking water using established research, data, or precedents. Avoid speculation.">
+                            <div class="card-phase">3.4 — Authority</div>
+                            <div class="card-text">Build authority with evidence and precedent</div>
+                        </div>
+                    </div>
+                </div>
 
-        sendBtn.addEventListener('click', async () => {
-            const text = userInput.value.trim();
-            if (!text && currentStepIndex === 0) return;
+                <!-- Messages will be appended here -->
+                <div class="messages-list" id="messagesList"></div>
+            </div>
 
-            const currentStep = steps[currentStepIndex];
-            
-            // Prepare UI
-            sendBtn.disabled = true;
-            loader.style.display = 'block';
+            <!-- Input area -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <div class="input-top-bar" id="inputTopBar">
+                        <div class="refinement-chips" id="refinementChips" style="display:none;">
+                            <button class="ref-chip" data-instruction="Correct grammar and improve readability without diluting the core argument.">Grammar fix</button>
+                            <button class="ref-chip" data-instruction="Summarise this without loss of substance or diluting the core argument.">Summarise</button>
+                            <button class="ref-chip" data-instruction="Critically evaluate strengths, weaknesses, and risks without diluting the core argument.">Critique</button>
+                            <button class="ref-chip" data-instruction="Stress-test this with strong counter-arguments without diluting the core argument.">Stress test</button>
+                            <button class="ref-chip" data-instruction="Sharpen the language for precision without diluting the core argument.">Sharpen</button>
+                            <button class="ref-chip" data-instruction="Reorganise the structure without adding content or diluting the core argument.">Restructure</button>
+                        </div>
+                    </div>
+                    <div class="input-box">
+                        <textarea 
+                            id="userInput" 
+                            placeholder="Describe your idea, issue, or observation…" 
+                            rows="1"
+                            autofocus
+                        ></textarea>
+                        <button class="send-btn" id="sendBtn" disabled title="Send message">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="input-footer">
+                        <span class="input-note">Framework enforces the protection line on every interaction.</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 
-            // Construct Framework Prompt
-            const protectionLine = "SYSTEM INSTRUCTION: You are an AI assistant operating under an Instruction-Discipline Framework. Your core rule is to refine and analyze WITHOUT DILUTING THE CORE ARGUMENT.";
-            const frameworkPrompt = `${protectionLine}\n\nContext so far:\n${contextHistory}\n\nTask: ${currentStep.prompt}\n\nUser Input: ${text}`;
-
-            try {
-                const aiResponse = await callGemini(frameworkPrompt);
-                
-                // Update Logic
-                contextHistory += `\nStep ${currentStep.label}: ${aiResponse}\n`;
-                
-                // Add to Workspace
-                const block = document.createElement('div');
-                block.className = 'response-block';
-                block.innerHTML = `
-                    <h2>${currentStep.label}</h2>
-                    <div class="content">${aiResponse}</div>
-                `;
-                workspace.appendChild(block);
-                block.scrollIntoView({ behavior: 'smooth' });
-
-                // Update Sidebar and Progress
-                document.getElementById(currentStep.id).classList.remove('active');
-                document.getElementById(currentStep.id).classList.add('completed');
-                
-                currentStepIndex++;
-                
-                if (currentStepIndex < steps.length) {
-                    const nextStep = steps[currentStepIndex];
-                    document.getElementById(nextStep.id).classList.add('active');
-                    document.getElementById('current-step-label').innerText = `Next: ${nextStep.label}`;
-                    userInput.value = "";
-                    userInput.placeholder = `Provide specific details for ${nextStep.label} (Optional)...`;
-                } else {
-                    document.getElementById('current-step-label').innerText = "Framework Analysis Complete";
-                    userInput.disabled = true;
-                    sendBtn.style.display = 'none';
-                }
-
-            } catch (error) {
-                console.error(error);
-                alert("Error calling Gemini API. Please check your key.");
-            } finally {
-                sendBtn.disabled = false;
-                loader.style.display = 'none';
-            }
-        });
-    </script>
+    <script src="js/app.js"></script>
 </body>
 </html>
