@@ -1,709 +1,225 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Intellector - AI Study Buddy 🎓</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🎓</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --primary:#6C63FF;--primary-hover:#5B52E0;--primary-light:rgba(108,99,255,.1);
-  --gradient:linear-gradient(135deg,#6C63FF,#4ECDC4);
-  --bg:#f0f2f5;--bg-sidebar:#ffffff;--bg-chat:#f0f2f5;--bg-input:#ffffff;
-  --bg-bot:#ffffff;--bg-hover:#f0f0f5;--bg-card:#ffffff;--bg-modal:#ffffff;
-  --text:#1a1a2e;--text2:#64748b;--text-user:#fff;
-  --border:#e2e8f0;
-  --shadow:0 2px 12px rgba(0,0,0,.08);--shadow-lg:0 10px 40px rgba(0,0,0,.12);
-  --radius:12px;--sidebar-w:280px;--header-h:64px;
-}
-[data-theme="dark"]{
-  --bg:#0b0b1a;--bg-sidebar:#101028;--bg-chat:#0b0b1a;--bg-input:#161640;
-  --bg-bot:#161640;--bg-hover:#1c1c4a;--bg-card:#161640;--bg-modal:#161640;
-  --text:#e2e8f0;--text2:#94a3b8;
-  --border:#1e1e50;
-  --shadow:0 2px 12px rgba(0,0,0,.3);--shadow-lg:0 10px 40px rgba(0,0,0,.4);
-}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .3s,color .3s}
-.app{display:flex;height:100vh}
-
-/* ===== SIDEBAR ===== */
-.sidebar{width:var(--sidebar-w);background:var(--bg-sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:transform .3s,background .3s;z-index:100}
-.sidebar-head{padding:20px;border-bottom:1px solid var(--border)}
-.logo{display:flex;align-items:center;gap:10px;font-size:1.3rem;font-weight:700}
-.logo-icon{font-size:1.8rem}
-.logo span.grad{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.new-chat{width:100%;margin-top:14px;padding:10px 16px;border:1.5px dashed var(--border);border-radius:var(--radius);background:transparent;color:var(--text);font-size:.9rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s}
-.new-chat:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
-.chat-list{flex:1;overflow-y:auto;padding:10px}
-.chat-item{padding:10px 14px;border-radius:var(--radius);cursor:pointer;font-size:.85rem;color:var(--text2);display:flex;align-items:center;gap:8px;transition:all .2s;margin-bottom:2px;position:relative}
-.chat-item:hover,.chat-item.active{background:var(--bg-hover);color:var(--text)}
-.chat-item.active{font-weight:600;color:var(--primary)}
-.chat-item .del{display:none;position:absolute;right:8px;background:none;border:none;color:#ef4444;cursor:pointer;font-size:1rem;padding:2px 6px;border-radius:6px}
-.chat-item:hover .del{display:block}
-.chat-item .del:hover{background:rgba(239,68,68,.1)}
-.sidebar-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
-.sidebar-btn{padding:10px 14px;border:none;border-radius:var(--radius);background:transparent;color:var(--text2);font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .2s;text-align:left}
-.sidebar-btn:hover{background:var(--bg-hover);color:var(--text)}
-
-/* ===== MAIN ===== */
-.main{flex:1;display:flex;flex-direction:column;min-width:0}
-.header{height:var(--header-h);padding:0 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);background:var(--bg-sidebar);transition:background .3s}
-.menu-btn{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text);padding:6px}
-.header-info{display:flex;align-items:center;gap:10px;flex:1}
-.header-info h1{font-size:1.1rem;font-weight:700}
-.header-info .status{font-size:.75rem;color:#22c55e;display:flex;align-items:center;gap:4px}
-.header-info .status::before{content:'';width:7px;height:7px;background:#22c55e;border-radius:50%;display:inline-block}
-.header-actions{display:flex;gap:6px}
-.header-actions button{background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text2);padding:6px 8px;border-radius:8px;transition:all .2s}
-.header-actions button:hover{background:var(--bg-hover);color:var(--text)}
-
-/* ===== MESSAGES ===== */
-.messages{flex:1;overflow-y:auto;padding:20px;scroll-behavior:smooth}
-.message{display:flex;gap:12px;margin-bottom:20px;animation:slideUp .3s ease;max-width:900px;margin-left:auto;margin-right:auto}
-.message.user{flex-direction:row-reverse}
-.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
-.message.bot .avatar{background:var(--gradient);color:#fff}
-.message.user .avatar{background:#e0e7ff;color:var(--primary)}
-.bubble{max-width:75%;padding:14px 18px;border-radius:18px;font-size:.92rem;line-height:1.7;position:relative}
-.message.bot .bubble{background:var(--bg-bot);border:1px solid var(--border);border-top-left-radius:4px;box-shadow:var(--shadow)}
-.message.user .bubble{background:var(--primary);color:var(--text-user);border-top-right-radius:4px}
-.message.bot .bubble .copy-msg{position:absolute;top:8px;right:8px;background:var(--bg-hover);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:.7rem;cursor:pointer;opacity:0;transition:opacity .2s;color:var(--text2)}
-.message.bot .bubble:hover .copy-msg{opacity:1}
-.message.bot .bubble .copy-msg:hover{background:var(--primary-light);color:var(--primary)}
-
-/* Markdown Styles */
-.bubble h1,.bubble h2,.bubble h3{margin:12px 0 6px;font-weight:700}
-.bubble h1{font-size:1.3rem}.bubble h2{font-size:1.15rem}.bubble h3{font-size:1rem}
-.bubble p{margin:6px 0}
-.bubble ul,.bubble ol{margin:6px 0 6px 20px}
-.bubble li{margin:3px 0}
-.bubble blockquote{border-left:3px solid var(--primary);margin:8px 0;padding:4px 12px;color:var(--text2);background:var(--primary-light);border-radius:0 8px 8px 0}
-.bubble table{border-collapse:collapse;margin:8px 0;width:100%;font-size:.85rem}
-.bubble th,.bubble td{border:1px solid var(--border);padding:6px 10px;text-align:left}
-.bubble th{background:var(--bg-hover);font-weight:600}
-.bubble strong{font-weight:600}
-.bubble em{font-style:italic}
-.bubble a{color:var(--primary);text-decoration:none}
-.bubble a:hover{text-decoration:underline}
-.bubble hr{border:none;border-top:1px solid var(--border);margin:12px 0}
-
-/* Code Blocks */
-.bubble pre{background:#282c34;border-radius:10px;margin:10px 0;overflow:hidden;position:relative}
-.bubble pre .code-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#21252b;font-size:.75rem;color:#abb2bf}
-.bubble pre .copy-code{background:none;border:1px solid #3e4451;color:#abb2bf;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:.7rem;transition:all .2s}
-.bubble pre .copy-code:hover{background:#3e4451;color:#fff}
-.bubble pre code{display:block;padding:14px;overflow-x:auto;font-family:'Fira Code','Cascadia Code','Consolas',monospace;font-size:.85rem;line-height:1.6}
-.bubble code:not(pre code){background:var(--bg-hover);padding:2px 7px;border-radius:5px;font-size:.85rem;font-family:'Fira Code','Cascadia Code','Consolas',monospace;color:var(--primary)}
-
-/* Typing Indicator */
-.typing{display:flex;gap:4px;padding:8px 0}
-.typing span{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:bounce .6s infinite}
-.typing span:nth-child(2){animation-delay:.15s}
-.typing span:nth-child(3){animation-delay:.3s}
-
-/* ===== WELCOME ===== */
-.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 20px}
-.welcome-icon{font-size:4rem;margin-bottom:16px;animation:float 3s ease-in-out infinite}
-.welcome h2{font-size:1.8rem;font-weight:800;margin-bottom:8px}
-.welcome h2 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.welcome p{color:var(--text2);font-size:1rem;margin-bottom:30px;max-width:500px}
-.suggestions{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:600px;width:100%}
-.sug-card{padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:left;font-size:.85rem;color:var(--text2);transition:all .2s;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow)}
-.sug-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow-lg);color:var(--text)}
-.sug-card .sug-icon{font-size:1.3rem}
-
-/* ===== INPUT ===== */
-.input-area{padding:14px 20px 18px;background:var(--bg);transition:background .3s}
-.input-box{max-width:900px;margin:0 auto;display:flex;align-items:flex-end;gap:10px;background:var(--bg-input);border:1.5px solid var(--border);border-radius:16px;padding:6px 6px 6px 18px;box-shadow:var(--shadow);transition:border .2s,background .3s}
-.input-box:focus-within{border-color:var(--primary)}
-.input-box textarea{flex:1;border:none;outline:none;background:transparent;font-family:'Inter',sans-serif;font-size:.95rem;color:var(--text);resize:none;max-height:150px;padding:8px 0;line-height:1.5}
-.input-box textarea::placeholder{color:var(--text2)}
-.send-btn{width:40px;height:40px;border:none;border-radius:12px;background:var(--gradient);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,opacity .2s;flex-shrink:0}
-.send-btn:hover{transform:scale(1.05)}
-.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.send-btn svg{width:18px;height:18px}
-.stop-btn{background:#ef4444!important}
-.input-footer{text-align:center;font-size:.72rem;color:var(--text2);margin-top:8px;max-width:900px;margin-left:auto;margin-right:auto}
-
-/* ===== MODAL ===== */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:all .3s}
-.modal-overlay.show{opacity:1;visibility:visible}
-.modal{background:var(--bg-modal);border-radius:20px;padding:36px;max-width:440px;width:90%;box-shadow:var(--shadow-lg);text-align:center;transform:scale(.9);transition:transform .3s,background .3s;border:1px solid var(--border)}
-.modal-overlay.show .modal{transform:scale(1)}
-.modal-icon{font-size:3rem;margin-bottom:12px}
-.modal h2{font-size:1.4rem;font-weight:700;margin-bottom:6px}
-.modal h2 span{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.modal>p{color:var(--text2);font-size:.9rem;margin-bottom:20px}
-.modal input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.95rem;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);outline:none;transition:border .2s}
-.modal input:focus{border-color:var(--primary)}
-.modal .modal-help{font-size:.8rem;color:var(--text2);margin-top:10px}
-.modal .modal-help a{color:var(--primary)}
-.modal .modal-btn{width:100%;padding:12px;border:none;border-radius:var(--radius);background:var(--gradient);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;margin-top:16px;transition:transform .15s}
-.modal .modal-btn:hover{transform:scale(1.02)}
-.modal .modal-err{color:#ef4444;font-size:.82rem;margin-top:8px;display:none}
-
-/* ===== OVERLAY ===== */
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:90}
-
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
-::-webkit-scrollbar-thumb:hover{background:var(--text2)}
-
-/* ===== ANIMATIONS ===== */
-@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:768px){
-  .sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%)}
-  .sidebar.open{transform:translateX(0)}
-  .sb-overlay.show{display:block}
-  .menu-btn{display:block!important}
-  .bubble{max-width:88%}
-  .suggestions{grid-template-columns:1fr}
-  .welcome h2{font-size:1.4rem}
-}
-@media(max-width:480px){
-  .bubble{max-width:92%;padding:12px 14px;font-size:.87rem}
-  .header{padding:0 12px}
-  .messages{padding:14px}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discipline AI — Responsible Reasoning Framework</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-
-<!-- ===== API KEY MODAL ===== -->
-<div class="modal-overlay" id="apiModal">
-  <div class="modal">
-    <div class="modal-icon">🔑</div>
-    <h2>Welcome to <span>Intellector</span></h2>
-    <p>Enter your Google Gemini API key to start learning</p>
-    <input type="password" id="apiInput" placeholder="Paste your API key here..." autocomplete="off">
-    <p class="modal-help">🆓 Get your free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a></p>
-    <p class="modal-err" id="apiErr">Invalid API key. Please check and try again.</p>
-    <button class="modal-btn" id="apiSave">Start Learning 🚀</button>
-  </div>
-</div>
-
-<!-- ===== SETTINGS MODAL ===== -->
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal">
-    <div class="modal-icon">⚙️</div>
-    <h2>Settings</h2>
-    <p>Manage your Intellector preferences</p>
-    <input type="password" id="settingsApiInput" placeholder="Update API key...">
-    <button class="modal-btn" id="settingsSave">Save Settings</button>
-    <button class="modal-btn" id="settingsClose" style="background:var(--bg-hover);color:var(--text);margin-top:8px">Close</button>
-  </div>
-</div>
-
-<!-- ===== APP ===== -->
-<div class="app">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-head">
-      <div class="logo">
-        <span class="logo-icon">🎓</span>
-        <span class="grad">Intellector</span>
-      </div>
-      <button class="new-chat" id="newChatBtn">
-        <span style="font-size:1.2rem">+</span> New Chat
-      </button>
-    </div>
-    <div class="chat-list" id="chatList"></div>
-    <div class="sidebar-foot">
-      <button class="sidebar-btn" id="themeBtn">
-        <span id="themeIcon">🌙</span>
-        <span id="themeText">Dark Mode</span>
-      </button>
-      <button class="sidebar-btn" id="settingsBtn">⚙️ Settings</button>
-      <button class="sidebar-btn" id="clearAllBtn">🗑️ Clear All Chats</button>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main">
-    <header class="header">
-      <button class="menu-btn" id="menuBtn" style="display:none">☰</button>
-      <div class="header-info">
-        <span style="font-size:1.4rem">🎓</span>
-        <div>
-          <h1>Intellector</h1>
-          <div class="status">Online</div>
+    <!-- Startup Overlay — API Key Entry -->
+    <div class="api-overlay" id="apiOverlay">
+        <div class="api-modal">
+            <div class="api-modal-brand">
+                <div class="brand-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect x="2" y="2" width="28" height="28" rx="6" stroke="#c8a elegance" stroke-width="2.5" fill="none" stroke="currentColor"/>
+                        <path d="M10 16h12M16 10v12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h1>Discipline AI</h1>
+                <p class="api-subtitle">Responsible AI-Assisted Reasoning</p>
+            </div>
+            <div class="api-form">
+                <label for="apiKeyInput">Gemini API Key</label>
+                <div class="api-input-wrap">
+                    <input 
+                        type="password" 
+                        id="apiKeyInput" 
+                        placeholder="Enter your Google Gemini API key"
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <button class="api-toggle-vis" id="toggleKeyVis" title="Show key">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
+                <p class="api-hint">Your key stays in your browser. Never sent to any server except Google's API.</p>
+                <button class="api-submit" id="apiSubmit">Enter Framework</button>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="api-get-key">Get a free API key from Google AI Studio →</a>
+            </div>
         </div>
-      </div>
-      <div class="header-actions">
-        <button onclick="exportChat()" title="Export chat">📥</button>
-        <button onclick="deleteCurrentChat()" title="Delete this chat">🗑️</button>
-      </div>
-    </header>
-
-    <div class="messages" id="messages">
-      <div class="welcome" id="welcome">
-        <div class="welcome-icon">🎓</div>
-        <h2>Hi! I'm <span>Intellector</span></h2>
-        <p>Your AI-powered study buddy. Ask me anything about Math, Science, Programming, History, and more!</p>
-        <div class="suggestions" id="suggestions">
-          <div class="sug-card" data-q="Explain the concept of derivatives in calculus with simple examples">
-            <span class="sug-icon">📐</span>Explain derivatives in calculus
-          </div>
-          <div class="sug-card" data-q="How does photosynthesis work? Explain step by step with a diagram description">
-            <span class="sug-icon">🌱</span>How does photosynthesis work?
-          </div>
-          <div class="sug-card" data-q="Write a Python program to implement binary search and explain how it works">
-            <span class="sug-icon">💻</span>Python binary search program
-          </div>
-          <div class="sug-card" data-q="Summarize the main causes and effects of World War II">
-            <span class="sug-icon">📚</span>Causes of World War II
-          </div>
-        </div>
-      </div>
     </div>
 
-    <div class="input-area">
-      <div class="input-box" id="inputBox">
-        <textarea id="msgInput" placeholder="Ask Intellector anything..." rows="1"></textarea>
-        <button class="send-btn" id="sendBtn" title="Send">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+    <!-- Main Application -->
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-mark">
+                        <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+                            <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2.5"/>
+                            <path d="M10 16h12M16 10v12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <span class="brand-name">Discipline AI</span>
+                </div>
+                <button class="new-chat-btn" id="newChatBtn" title="New session">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-label">Framework Phases</div>
+                <nav class="phase-nav">
+                    <button class="phase-btn active" data-phase="open">
+                        <span class="phase-indicator"></span>
+                        Open Dialogue
+                    </button>
+                    <button class="phase-btn" data-phase="identify">
+                        <span class="phase-indicator"></span>
+                        3.1 — Idea Identification
+                    </button>
+                    <button class="phase-btn" data-phase="expand">
+                        <span class="phase-indicator"></span>
+                        3.2 — Question Expansion
+                    </button>
+                    <button class="phase-btn" data-phase="scope">
+                        <span class="phase-indicator"></span>
+                        3.3 — Scope Control
+                    </button>
+                    <button class="phase-btn" data-phase="authority">
+                        <span class="phase-indicator"></span>
+                        3.4 — Authority Building
+                    </button>
+                    <button class="phase-btn" data-phase="output">
+                        <span class="phase-indicator"></span>
+                        3.5 — Output Selection
+                    </button>
+                    <div class="phase-divider"></div>
+                    <button class="phase-btn" data-phase="refine">
+                        <span class="phase-indicator"></span>
+                        4.0 — Instruction Discipline
+                    </button>
+                </nav>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-label">History</div>
+                <div class="history-list" id="historyList">
+                    <div class="history-empty">No previous sessions</div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="sidebar-footer-btn" id="clearAllBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                        <path d="M10 11v6M14 11v6"/>
+                    </svg>
+                    Clear all sessions
+                </button>
+                <button class="sidebar-footer-btn" id="changeKeyBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.78 7.78 5.5 5.5 0 017.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                    </svg>
+                    Change API key
+                </button>
+            </div>
+        </aside>
+
+        <!-- Mobile sidebar toggle -->
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
         </button>
-      </div>
-      <div class="input-footer">Intellector can make mistakes. Please verify important information.</div>
+
+        <!-- Main Chat Area -->
+        <main class="main-area">
+            <!-- Chat header -->
+            <div class="chat-header" id="chatHeader">
+                <div class="chat-header-phase" id="headerPhaseLabel">Open Dialogue</div>
+                <div class="protection-line">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Protection: "…without diluting the core argument."
+                </div>
+            </div>
+
+            <!-- Messages container -->
+            <div class="messages-container" id="messagesContainer">
+                <!-- Welcome screen -->
+                <div class="welcome-screen" id="welcomeScreen">
+                    <div class="welcome-icon">
+                        <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+                            <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M10 16h12M16 10v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h2>Discipline AI Framework</h2>
+                    <p>Responsible AI-Assisted Reasoning</p>
+                    <div class="welcome-cards">
+                        <div class="welcome-card" data-prompt="I have a raw idea about the impact of social media algorithms on democratic discourse. Help me identify the core issue.">
+                            <div class="card-phase">3.1 — Identify</div>
+                            <div class="card-text">Identify the core issue from a raw observation</div>
+                        </div>
+                        <div class="welcome-card" data-prompt="From this issue of rising antibiotic resistance, list all meaningful questions that arise across scientific, policy, and public health domains.">
+                            <div class="card-phase">3.2 — Expand</div>
+                            <div class="card-text">Map analytical questions from an issue</div>
+                        </div>
+                        <div class="welcome-card" data-prompt="Categorise the issue of urban water scarcity by domain — science, law, economy, public health, governance. Indicate feasible depth of analysis in each.">
+                            <div class="card-phase">3.3 — Scope</div>
+                            <div class="card-text">Control scope with domain mapping</div>
+                        </div>
+                        <div class="welcome-card" data-prompt="Analyse the issue of microplastic contamination in drinking water using established research, data, or precedents. Avoid speculation.">
+                            <div class="card-phase">3.4 — Authority</div>
+                            <div class="card-text">Build authority with evidence and precedent</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages will be appended here -->
+                <div class="messages-list" id="messagesList"></div>
+            </div>
+
+            <!-- Input area -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <div class="input-top-bar" id="inputTopBar">
+                        <div class="refinement-chips" id="refinementChips" style="display:none;">
+                            <button class="ref-chip" data-instruction="Correct grammar and improve readability without diluting the core argument.">Grammar fix</button>
+                            <button class="ref-chip" data-instruction="Summarise this without loss of substance or diluting the core argument.">Summarise</button>
+                            <button class="ref-chip" data-instruction="Critically evaluate strengths, weaknesses, and risks without diluting the core argument.">Critique</button>
+                            <button class="ref-chip" data-instruction="Stress-test this with strong counter-arguments without diluting the core argument.">Stress test</button>
+                            <button class="ref-chip" data-instruction="Sharpen the language for precision without diluting the core argument.">Sharpen</button>
+                            <button class="ref-chip" data-instruction="Reorganise the structure without adding content or diluting the core argument.">Restructure</button>
+                        </div>
+                    </div>
+                    <div class="input-box">
+                        <textarea 
+                            id="userInput" 
+                            placeholder="Describe your idea, issue, or observation…" 
+                            rows="1"
+                            autofocus
+                        ></textarea>
+                        <button class="send-btn" id="sendBtn" disabled title="Send message">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="input-footer">
+                        <span class="input-note">Framework enforces the protection line on every interaction.</span>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-  </main>
-</div>
 
-<div class="sb-overlay" id="sbOverlay"></div>
-
-<script>
-// ===== CONFIGURATION =====
-const SYSTEM_PROMPT = `You are Intellector, an intelligent, friendly, and encouraging AI study buddy created to help students learn effectively.
-
-Your guidelines:
-1. Explain concepts clearly with examples and real-world analogies
-2. Use markdown formatting: headings, bold, lists, tables, code blocks
-3. Use code blocks with language tags (e.g. \`\`\`python) for programming
-4. Break complex topics into simple, numbered steps
-5. Be encouraging, supportive, and patient
-6. Show step-by-step solutions for math/science problems
-7. If a student seems confused, try a different explanation approach
-8. Use bullet points and numbered lists for clarity
-9. Suggest related topics at the end when helpful
-10. Use emojis occasionally to keep it friendly 🎯
-11. If unsure, say so honestly
-12. Keep responses thorough but not unnecessarily long`;
-
-const MODEL = 'gemini-2.0-flash';
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}`;
-
-// ===== STATE =====
-let conversations = JSON.parse(localStorage.getItem('intellector_convos') || '[]');
-let activeId = localStorage.getItem('intellector_active') || null;
-let isGenerating = false;
-let abortCtrl = null;
-
-// ===== DOM =====
-const $ = id => document.getElementById(id);
-const apiModal = $('apiModal'), settingsModal = $('settingsModal');
-const apiInput = $('apiInput'), apiErr = $('apiErr');
-const msgInput = $('msgInput'), sendBtn = $('sendBtn');
-const messagesEl = $('messages'), welcomeEl = $('welcome');
-const chatListEl = $('chatList'), sidebar = $('sidebar'), sbOverlay = $('sbOverlay');
-
-// ===== INIT =====
-window.addEventListener('DOMContentLoaded', () => {
-  // Theme
-  const t = localStorage.getItem('intellector_theme') || 'light';
-  setTheme(t);
-
-  // API key check
-  if (!getKey()) apiModal.classList.add('show');
-
-  // Load conversations
-  renderChatList();
-  if (activeId) loadConversation(activeId);
-
-  // Configure marked
-  marked.setOptions({ breaks: true, gfm: true });
-
-  // Textarea auto-resize
-  msgInput.addEventListener('input', autoResize);
-
-  // Enter to send
-  msgInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  });
-});
-
-// ===== API KEY =====
-function getKey() { return localStorage.getItem('intellector_key') || ''; }
-
-$('apiSave').onclick = async () => {
-  const key = apiInput.value.trim();
-  if (!key) { apiErr.textContent = 'Please enter an API key.'; apiErr.style.display = 'block'; return; }
-  apiErr.style.display = 'none';
-  // Verify key
-  try {
-    const r = await fetch(`${API_URL}:generateContent?key=${key}`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({contents:[{parts:[{text:'Hi'}]}]})
-    });
-    if (!r.ok) throw new Error();
-    localStorage.setItem('intellector_key', key);
-    apiModal.classList.remove('show');
-  } catch {
-    apiErr.textContent = 'Invalid API key. Please check and try again.';
-    apiErr.style.display = 'block';
-  }
-};
-
-$('settingsBtn').onclick = () => {
-  $('settingsApiInput').value = '';
-  settingsModal.classList.add('show');
-  closeSidebar();
-};
-$('settingsSave').onclick = () => {
-  const k = $('settingsApiInput').value.trim();
-  if (k) localStorage.setItem('intellector_key', k);
-  settingsModal.classList.remove('show');
-};
-$('settingsClose').onclick = () => settingsModal.classList.remove('show');
-
-// ===== THEME =====
-function setTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  localStorage.setItem('intellector_theme', t);
-  $('themeIcon').textContent = t === 'dark' ? '☀️' : '🌙';
-  $('themeText').textContent = t === 'dark' ? 'Light Mode' : 'Dark Mode';
-}
-$('themeBtn').onclick = () => {
-  const cur = document.documentElement.getAttribute('data-theme');
-  setTheme(cur === 'dark' ? 'light' : 'dark');
-};
-
-// ===== SIDEBAR MOBILE =====
-$('menuBtn').onclick = () => { sidebar.classList.add('open'); sbOverlay.classList.add('show'); };
-function closeSidebar() { sidebar.classList.remove('open'); sbOverlay.classList.remove('show'); }
-sbOverlay.onclick = closeSidebar;
-
-// ===== CONVERSATIONS =====
-function save() {
-  localStorage.setItem('intellector_convos', JSON.stringify(conversations));
-  localStorage.setItem('intellector_active', activeId);
-}
-
-function newConvo() {
-  const c = { id: 'c_' + Date.now(), title: 'New Chat', msgs: [], created: Date.now() };
-  conversations.unshift(c);
-  activeId = c.id;
-  save();
-  renderChatList();
-  renderMessages();
-  closeSidebar();
-  msgInput.focus();
-}
-$('newChatBtn').onclick = newConvo;
-
-function getConvo(id) { return conversations.find(c => c.id === id); }
-function activeConvo() { return getConvo(activeId); }
-
-function loadConversation(id) {
-  activeId = id;
-  save();
-  renderChatList();
-  renderMessages();
-  closeSidebar();
-}
-
-function deleteCurrentChat() {
-  if (!activeId) return;
-  conversations = conversations.filter(c => c.id !== activeId);
-  activeId = conversations.length ? conversations[0].id : null;
-  save();
-  renderChatList();
-  if (activeId) renderMessages(); else { clearMsgArea(); welcomeEl.style.display = 'flex'; }
-}
-
-$('clearAllBtn').onclick = () => {
-  if (!confirm('Delete all chats?')) return;
-  conversations = []; activeId = null; save();
-  renderChatList(); clearMsgArea(); welcomeEl.style.display = 'flex';
-  closeSidebar();
-};
-
-function renderChatList() {
-  chatListEl.innerHTML = '';
-  conversations.forEach(c => {
-    const div = document.createElement('div');
-    div.className = 'chat-item' + (c.id === activeId ? ' active' : '');
-    div.innerHTML = `💬 <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.title)}</span><button class="del" title="Delete">×</button>`;
-    div.querySelector('.del').onclick = e => {
-      e.stopPropagation();
-      conversations = conversations.filter(x => x.id !== c.id);
-      if (activeId === c.id) { activeId = conversations.length ? conversations[0].id : null; }
-      save(); renderChatList();
-      if (activeId) renderMessages(); else { clearMsgArea(); welcomeEl.style.display = 'flex'; }
-    };
-    div.onclick = () => loadConversation(c.id);
-    chatListEl.appendChild(div);
-  });
-}
-
-// ===== MESSAGES =====
-function clearMsgArea() {
-  messagesEl.querySelectorAll('.message').forEach(m => m.remove());
-  const typ = messagesEl.querySelector('.typing-wrap');
-  if (typ) typ.remove();
-}
-
-function renderMessages() {
-  clearMsgArea();
-  const c = activeConvo();
-  if (!c) { welcomeEl.style.display = 'flex'; return; }
-  welcomeEl.style.display = c.msgs.length ? 'none' : 'flex';
-  c.msgs.forEach(m => appendMsg(m.role, m.content, false));
-  scrollBottom();
-}
-
-function appendMsg(role, content, animate = true) {
-  welcomeEl.style.display = 'none';
-  const div = document.createElement('div');
-  div.className = `message ${role}`;
-  div.style.animation = animate ? 'slideUp .3s ease' : 'none';
-
-  const avatar = role === 'bot' ? '🎓' : '👤';
-  const rendered = role === 'bot' ? renderMd(content) : esc(content).replace(/\n/g,'<br>');
-
-  div.innerHTML = `
-    <div class="avatar">${avatar}</div>
-    <div class="bubble">
-      ${role === 'bot' ? '<button class="copy-msg" onclick="copyText(this)">Copy</button>' : ''}
-      <div class="msg-content">${rendered}</div>
-    </div>`;
-
-  messagesEl.appendChild(div);
-  // Highlight code blocks
-  div.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
-  // Add copy buttons to code blocks
-  div.querySelectorAll('pre').forEach(addCodeCopyBtn);
-
-  if (animate) scrollBottom();
-  return div;
-}
-
-function addCodeCopyBtn(pre) {
-  if (pre.querySelector('.code-header')) return;
-  const code = pre.querySelector('code');
-  const lang = (code?.className?.match(/language-(\w+)/)||[])[1] || 'code';
-  const header = document.createElement('div');
-  header.className = 'code-header';
-  header.innerHTML = `<span>${lang}</span><button class="copy-code" onclick="copyCode(this)">📋 Copy</button>`;
-  pre.insertBefore(header, pre.firstChild);
-}
-
-// ===== RENDER MARKDOWN =====
-function renderMd(text) {
-  try { return marked.parse(text); }
-  catch { return esc(text).replace(/\n/g,'<br>'); }
-}
-
-function esc(s) {
-  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
-}
-
-// ===== COPY =====
-function copyText(btn) {
-  const text = btn.parentElement.querySelector('.msg-content').innerText;
-  navigator.clipboard.writeText(text);
-  btn.textContent = '✓ Copied';
-  setTimeout(() => btn.textContent = 'Copy', 1500);
-}
-
-function copyCode(btn) {
-  const code = btn.closest('pre').querySelector('code').innerText;
-  navigator.clipboard.writeText(code);
-  btn.textContent = '✓ Copied!';
-  setTimeout(() => btn.textContent = '📋 Copy', 1500);
-}
-
-function exportChat() {
-  const c = activeConvo();
-  if (!c || !c.msgs.length) return alert('No messages to export.');
-  let text = `=== INTELLECTOR CHAT ===\n${c.title}\n${'='.repeat(30)}\n\n`;
-  c.msgs.forEach(m => {
-    text += `[${m.role === 'user' ? 'You' : 'Intellector'}]\n${m.content}\n\n`;
-  });
-  const blob = new Blob([text], {type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `intellector-${c.title.substring(0,20)}.txt`;
-  a.click();
-}
-
-// ===== SCROLL =====
-function scrollBottom() {
-  setTimeout(() => messagesEl.scrollTop = messagesEl.scrollHeight, 50);
-}
-
-// ===== AUTO-RESIZE TEXTAREA =====
-function autoResize() {
-  msgInput.style.height = 'auto';
-  msgInput.style.height = Math.min(msgInput.scrollHeight, 150) + 'px';
-}
-
-// ===== SUGGESTION CARDS =====
-document.querySelectorAll('.sug-card').forEach(card => {
-  card.onclick = () => {
-    msgInput.value = card.dataset.q;
-    autoResize();
-    sendMessage();
-  };
-});
-
-// ===== SEND MESSAGE =====
-async function sendMessage() {
-  const text = msgInput.value.trim();
-  if (!text || isGenerating) return;
-
-  const key = getKey();
-  if (!key) { apiModal.classList.add('show'); return; }
-
-  // Create new convo if needed
-  if (!activeId) newConvo();
-  const convo = activeConvo();
-
-  // Add user message
-  convo.msgs.push({ role: 'user', content: text });
-  if (convo.msgs.length === 1) convo.title = text.substring(0, 50);
-  save();
-  renderChatList();
-
-  appendMsg('user', text);
-  msgInput.value = ''; msgInput.style.height = 'auto';
-
-  // Show typing
-  isGenerating = true;
-  updateSendBtn();
-  const typingEl = showTyping();
-
-  try {
-    // Build messages for API
-    const contents = convo.msgs.map(m => ({
-      role: m.role === 'user' ? 'user' : 'model',
-      parts: [{ text: m.content }]
-    }));
-
-    // Stream response
-    abortCtrl = new AbortController();
-    const res = await fetch(`${API_URL}:streamGenerateContent?alt=sse&key=${key}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents,
-        generationConfig: { temperature: 0.7, topP: 0.95, topK: 40, maxOutputTokens: 8192 }
-      }),
-      signal: abortCtrl.signal
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `API Error ${res.status}`);
-    }
-
-    // Remove typing indicator and add bot message
-    typingEl.remove();
-    const botDiv = appendMsg('bot', '');
-    const contentEl = botDiv.querySelector('.msg-content');
-    let fullText = '';
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          try {
-            const data = JSON.parse(line.slice(6));
-            const chunk = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            fullText += chunk;
-            contentEl.innerHTML = renderMd(fullText);
-            contentEl.querySelectorAll('pre code').forEach(b => {
-              if (!b.dataset.hl) { hljs.highlightElement(b); b.dataset.hl = '1'; }
-            });
-            contentEl.querySelectorAll('pre').forEach(addCodeCopyBtn);
-            scrollBottom();
-          } catch {}
-        }
-      }
-    }
-
-    // Save bot response
-    convo.msgs.push({ role: 'bot', content: fullText });
-    save();
-
-  } catch (err) {
-    typingEl.remove();
-    if (err.name === 'AbortError') {
-      appendMsg('bot', '*Generation stopped.*');
-    } else {
-      appendMsg('bot', `⚠️ **Error:** ${err.message}\n\nPlease check your API key or try again.`);
-      // Remove failed user message
-      convo.msgs.pop();
-      save();
-    }
-  } finally {
-    isGenerating = false;
-    abortCtrl = null;
-    updateSendBtn();
-  }
-}
-
-// ===== TYPING INDICATOR =====
-function showTyping() {
-  const div = document.createElement('div');
-  div.className = 'message bot typing-wrap';
-  div.innerHTML = `<div class="avatar">🎓</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
-  messagesEl.appendChild(div);
-  scrollBottom();
-  return div;
-}
-
-// ===== SEND BUTTON STATE =====
-function updateSendBtn() {
-  if (isGenerating) {
-    sendBtn.innerHTML = '■';
-    sendBtn.classList.add('stop-btn');
-    sendBtn.title = 'Stop generating';
-    sendBtn.disabled = false;
-    sendBtn.onclick = () => { if (abortCtrl) abortCtrl.abort(); };
-  } else {
-    sendBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>';
-    sendBtn.classList.remove('stop-btn');
-    sendBtn.title = 'Send';
-    sendBtn.onclick = sendMessage;
-  }
-}
-
-// Init send button
-sendBtn.onclick = sendMessage;
-</script>
+    <script src="js/app.js"></script>
 </body>
 </html>
